@@ -1,18 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace UserTasksService.Models
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            :base(options)
-        {
+        private readonly IConfiguration config;
 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration config)
+            : base(options)
+        {
+            this.config = config;
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(config.GetConnectionString("ApplicationDB"));
+        }
+
         public DbSet<UserTask> UserTasks { get; set; }
 
         public DbSet<User> Users { get; set; }
