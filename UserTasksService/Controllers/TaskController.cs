@@ -69,6 +69,7 @@ namespace UserTasksService.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var id = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
                     var userTask = new UserTask()
                     {
                         TaskDate = DateTime.ParseExact(task.TaskNumber.Substring(0, 8), "yyyyMMdd", null, DateTimeStyles.None),
@@ -76,7 +77,7 @@ namespace UserTasksService.Controllers
                         Date = task.Date,
                         Status = task.Status,
                         Comment = task.Comment,
-                        UserId = 1
+                        UserId = id
                     };
                     repository.Add(userTask);
                     await repository.SaveChangesAsync();
