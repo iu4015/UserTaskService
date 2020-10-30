@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using UserTasksService.Models;
 
@@ -18,12 +20,14 @@ namespace UserTasksService.Controllers
             this.repository = repository;
         }
 
+        [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<IncomingUserTask>> Get(int Id)
         {
             try
             {
-                var result = await repository.GetUserTaskAsync(1, Id);
+                var userId = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
+                var result = await repository.GetUserTaskAsync(userId, Id);
 
                 if (result == null)
                     return BadRequest();
@@ -36,12 +40,14 @@ namespace UserTasksService.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IncomingUserTask[]>> Get()
         {
             try
             {
-                var result = await repository.GetAllUserTasksAsync(1);
+                var id = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
+                var result = await repository.GetAllUserTasksAsync(id);
 
                 if (result == null)
                     return BadRequest();
@@ -55,6 +61,7 @@ namespace UserTasksService.Controllers
             }
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<ActionResult<UserTask>> Post(IncomingUserTask task)
         {
@@ -73,7 +80,7 @@ namespace UserTasksService.Controllers
                     };
                     repository.Add(userTask);
                     await repository.SaveChangesAsync();
-                return Ok(userTask);
+                    return Ok(userTask);
                 }
                 else
                     return BadRequest();
@@ -83,7 +90,7 @@ namespace UserTasksService.Controllers
 
                 return BadRequest();
             }
-            
+
         }
     }
 }

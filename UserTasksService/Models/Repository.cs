@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,14 +21,15 @@ namespace UserTasksService.Models
         {
 
             IQueryable<IncomingUserTask> query = from uTask in context.UserTasks
-                                         where uTask.UserId == userId
-                                         select new IncomingUserTask { 
-                                             TaskNumber = uTask.TaskDate.ToString("yyyyMMdd") + "-" + string.Format("{0:0000}", uTask.Number),
-                                             Date = uTask.Date,
-                                             Status = uTask.Status,
-                                             Comment = uTask.Comment
-                                         };
-            
+                                                 where uTask.UserId == userId
+                                                 select new IncomingUserTask
+                                                 {
+                                                     TaskNumber = uTask.TaskDate.ToString("yyyyMMdd") + "-" + string.Format("{0:0000}", uTask.Number),
+                                                     Date = uTask.Date,
+                                                     Status = uTask.Status,
+                                                     Comment = uTask.Comment
+                                                 };
+
             return await query.ToArrayAsync();
         }
 
@@ -38,14 +37,14 @@ namespace UserTasksService.Models
         public async Task<IncomingUserTask> GetUserTaskAsync(int userId, int taskId)
         {
             IQueryable<IncomingUserTask> query = from uTask in context.UserTasks
-                                         where uTask.UserId == userId && uTask.Id == taskId
-                                         select new IncomingUserTask
-                                         {
-                                             TaskNumber = uTask.TaskDate.ToString("yyyyMMdd") + "-" + string.Format("{0:0000}", uTask.Number),
-                                             Date = uTask.Date,
-                                             Status = uTask.Status,
-                                             Comment = uTask.Comment
-                                         }; 
+                                                 where uTask.UserId == userId && uTask.Id == taskId
+                                                 select new IncomingUserTask
+                                                 {
+                                                     TaskNumber = uTask.TaskDate.ToString("yyyyMMdd") + "-" + string.Format("{0:0000}", uTask.Number),
+                                                     Date = uTask.Date,
+                                                     Status = uTask.Status,
+                                                     Comment = uTask.Comment
+                                                 };
 
             return await query.FirstOrDefaultAsync();
         }

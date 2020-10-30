@@ -12,11 +12,10 @@ namespace UserTasksService.Models
         [EmailAddress]
         public string Email { get; set; }
 
-        public IEnumerable<UserTask> Tasks { get; set; }
-        //[Required]
-        //[StringLength(20)]
-        //[DataType(DataType.Password)]
-        //public string Password { get; set; }
+        [Required]
+        [StringLength(20)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
 
 
     }

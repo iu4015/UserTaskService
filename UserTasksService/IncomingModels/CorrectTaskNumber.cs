@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace UserTasksService.IncomingModels
 {
-    public class CorrectTaskNumber: ValidationAttribute
+    public class CorrectTaskNumber : ValidationAttribute
     {
         public override bool IsValid(object value)
         {
