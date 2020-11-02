@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using UserTasksService.Models;
 
-namespace UserTasksService.Models
+namespace UserTasksService.Data
 {
-    public class Repository : IRepository
+    public class Repository : ITaskRepository
     {
         private readonly ApplicationDbContext context;
 
@@ -51,7 +52,7 @@ namespace UserTasksService.Models
 
         public async Task<bool> SaveChangesAsync()
         {
-            return (await context.SaveChangesAsync()) > 0;
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }

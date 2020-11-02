@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using UserTasksService.Models;
 
-namespace UserTasksService.Models
+namespace UserTasksService.Data
 {
     public class ApplicationDbContext : DbContext
     {

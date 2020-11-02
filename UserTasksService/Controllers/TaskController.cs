@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using UserTasksService.Data;
 using UserTasksService.Models;
 
 namespace UserTasksService.Controllers
@@ -13,11 +14,11 @@ namespace UserTasksService.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        private readonly IRepository repository;
+        private readonly ITaskRepository taskrepository;
 
-        public TaskController(IRepository repository)
+        public TaskController(ITaskRepository repository)
         {
-            this.repository = repository;
+            this.taskrepository = repository;
         }
 
         [Authorize]
@@ -27,7 +28,7 @@ namespace UserTasksService.Controllers
             try
             {
                 var userId = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
-                var result = await repository.GetUserTaskAsync(userId, Id);
+                var result = await taskrepository.GetUserTaskAsync(userId, Id);
 
                 if (result == null)
                     return BadRequest();
@@ -47,7 +48,7 @@ namespace UserTasksService.Controllers
             try
             {
                 var id = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
-                var result = await repository.GetAllUserTasksAsync(id);
+                var result = await taskrepository.GetAllUserTasksAsync(id);
 
                 if (result == null)
                     return BadRequest();
@@ -79,8 +80,8 @@ namespace UserTasksService.Controllers
                         Comment = task.Comment,
                         UserId = id
                     };
-                    repository.Add(userTask);
-                    await repository.SaveChangesAsync();
+                    taskrepository.Add(userTask);
+                    await taskrepository.SaveChangesAsync();
                     return Ok(userTask);
                 }
                 else

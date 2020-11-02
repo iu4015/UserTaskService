@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
+using UserTasksService.Models;
 
-namespace UserTasksService.Models
+namespace UserTasksService.Data
 {
-    public interface IRepository
+    public interface ITaskRepository
     {
         Task<IncomingUserTask> GetUserTaskAsync(int userId, int taskId);
         Task<IncomingUserTask[]> GetAllUserTasksAsync(int userId);

@@ -21,7 +21,7 @@ namespace UserTasksService.IncomingModels
                 Regex regex = new Regex(@"-\d{4}");
                 return regex.IsMatch(task.Substring(8));
             }
-            catch (Exception)
+            catch (ArgumentException)
             {
                 return false;
             }

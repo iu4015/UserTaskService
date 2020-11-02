@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using UserTasksService.Models;
+using UserTasksService.Data;
 using UserTasksService.Security;
 
 namespace UserTasksService
@@ -85,7 +85,7 @@ namespace UserTasksService
                      });
 
             services.AddDbContext<ApplicationDbContext>();
-            services.AddScoped<IRepository, Repository>();
+            services.AddScoped<ITaskRepository, Repository>();
 
             services.AddControllers();
         }

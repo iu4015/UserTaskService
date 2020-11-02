@@ -28,7 +28,7 @@ namespace UserTasksService.Controllers
             var identity = GetIdentity(username, password);
             if (identity == null)
             {
-                return BadRequest(new { errorText = "Invalid username or password." });
+                return NotFound(new { errorText = "Invalid username or password." });
             }
 
             var now = DateTime.UtcNow;
