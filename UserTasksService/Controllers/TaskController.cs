@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +15,23 @@ namespace UserTasksService.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        private readonly ITaskRepository taskrepository;
+        private readonly ITasksRepository taskrepository;
 
-        public TaskController(ITaskRepository repository)
+        public TaskController(ITasksRepository repository)
         {
             this.taskrepository = repository;
+        }
+
+        private int GetUsedId()
+        {
+            try
+            {
+                return Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == AcountController.ClaimsUserId).Value);
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
         }
 
         [Authorize]
@@ -27,17 +40,25 @@ namespace UserTasksService.Controllers
         {
             try
             {
-                var userId = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
-                var result = await taskrepository.GetUserTaskAsync(userId, Id);
+                var result = await taskrepository.GetTaskAsync(Id);
 
-                if (result == null)
+                if (result == null || GetUsedId() != result.UserId)
                     return BadRequest();
 
-                return Ok(result);
+                TaskNumber taskNumber = new TaskNumber(result.Number, result.TaskDate);
+
+                return Ok(
+                    new IncomingUserTask()
+                    {
+                        Comment = result.Comment,
+                        Date = result.Date,
+                        Status = result.Status,
+                        TaskNumber = taskNumber.ToString()
+                    });
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Repository failure");
             }
         }
 
@@ -47,52 +68,72 @@ namespace UserTasksService.Controllers
         {
             try
             {
-                var id = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
-                var result = await taskrepository.GetAllUserTasksAsync(id);
+                var result = await taskrepository.GetAllUserTasksAsync(GetUsedId());
 
                 if (result == null)
                     return BadRequest();
 
-                return Ok(result);
+                List<IncomingUserTask> userTasks = new List<IncomingUserTask>(result.Length);
+                
+                foreach (UserTask task in result)
+                { 
+                    var taskNumber = new TaskNumber(task.Number, task.TaskDate);
+                    
+                    userTasks.Add(
+                        new IncomingUserTask()
+                        {
+                            Comment = task.Comment,
+                            Date = task.Date,
+                            Status = task.Status,
+                            TaskNumber = task.ToString()
+                        });
+                }
+
+                return Ok(userTasks.ToArray());
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database failure");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Repository failure");
 
             }
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<UserTask>> Post(IncomingUserTask task)
+        public async Task<ActionResult<IncomingUserTask>> Post(IncomingUserTask task)
         {
-            try
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                var taskNumber = new TaskNumber(task.TaskNumber);
+                
+                if (taskNumber.IsValid)
                 {
-                    var id = Convert.ToInt32(User.Claims.SingleOrDefault(claim => claim.Type == "UserId").Value);
                     var userTask = new UserTask()
                     {
-                        TaskDate = DateTime.ParseExact(task.TaskNumber.Substring(0, 8), "yyyyMMdd", null, DateTimeStyles.None),
-                        Number = Convert.ToInt32(task.TaskNumber.Substring(9, 4)),
+                        TaskDate = taskNumber.Date,
+                        Number = taskNumber.Number,
                         Date = task.Date,
                         Status = task.Status,
                         Comment = task.Comment,
-                        UserId = id
+                        UserId = GetUsedId()
                     };
-                    taskrepository.Add(userTask);
-                    await taskrepository.SaveChangesAsync();
-                    return Ok(userTask);
+                    
+                    try
+                    {
+                        taskrepository.Add(userTask);
+                        await taskrepository.SaveChangesAsync();
+                        return Ok(task);
+                    }
+                    catch (Exception)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Repository failure");
+                    }
                 }
                 else
                     return BadRequest();
             }
-            catch (Exception)
-            {
-
+            else
                 return BadRequest();
-            }
-
         }
     }
 }

@@ -43,7 +43,7 @@ namespace UserTasksService
                         new string[] { }
                     }
                 });
-               
+
                 //  options.SwaggerDoc("v1", new Info { Title = "GAFE API", Version = "v1" });
 
                 //options.AddSecurityDefinition("oauth2", new OAuth2Scheme
@@ -85,7 +85,7 @@ namespace UserTasksService
                      });
 
             services.AddDbContext<ApplicationDbContext>();
-            services.AddScoped<ITaskRepository, Repository>();
+            services.AddScoped<ITasksRepository, TasksRepository>();
 
             services.AddControllers();
         }
